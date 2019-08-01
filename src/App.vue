@@ -7,9 +7,7 @@
 </template>
 
 <script>
-export default {
-  name: "App"
-};
+export default {};
 </script>
 
 <style lang="less">
@@ -27,11 +25,9 @@ body {
   bottom: 0;
   width: 100%;
 }
-
 .reng-container {
   margin-top: 20px;
 }
-
 .fade-enter-active,
 .fade-leave-active {
   transition: all 0.2s ease;
