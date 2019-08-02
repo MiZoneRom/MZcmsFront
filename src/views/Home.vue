@@ -109,7 +109,7 @@
 				vm.$confirm('确认退出吗?','提示',{
 					type: 'warning'
 				}).then(() => {
-					sessionStorage.removeItem('user');
+					sessionStorage.removeItem('Admin');
 					vm.$router.push({path:'/login'})
 				}).catch(() => {
 					console.log('error');
@@ -124,7 +124,7 @@
 			// 	path: '/'
 			// })
 			let username = JSON.parse(sessionStorage.getItem('Admin'));
-			vm.$fetch(apiPath.USER_INFO+'/'+username)
+			vm.$fetch(apiPath.USER_INFO+'?name='+username)
 				.then(data => {
 					vm.username = data.login;
 					vm.avatarUrl = data.avatar_url;
