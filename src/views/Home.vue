@@ -123,11 +123,11 @@
 			// this.$router.push({
 			// 	path: '/'
 			// })
-			let username = JSON.parse(sessionStorage.getItem('Admin'));
-			vm.$fetch(apiPath.USER_INFO+'?name='+username)
+			//let username = JSON.parse(sessionStorage.getItem('Admin'));
+			vm.$fetch(apiPath.USER_INFO)
 				.then(data => {
-					vm.username = data.login;
-					vm.avatarUrl = data.avatar_url;
+					vm.username = data.data.UserName;
+					vm.avatarUrl = data.data.Photo;
 				});
 		},
 		computed:{
