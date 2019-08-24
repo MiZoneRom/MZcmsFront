@@ -82,7 +82,7 @@
 		data() {
 			return {
 				collapsed: false,
-				username: '大美妞',
+				username: '-',
 				avatarUrl: 'http://pic.58pic.com/58pic/14/64/56/25h58PIC3eG_1024.jpg'
 			}
 		},
@@ -118,16 +118,10 @@
 		},
 		created(){
 			let vm = this;
-			// console.log(this.$router.options.routes);
-			// console.log(this.$route);
-			// this.$router.push({
-			// 	path: '/'
-			// })
-			//let username = JSON.parse(sessionStorage.getItem('Admin'));
 			vm.$fetch(apiPath.USER_INFO)
 				.then(data => {
-					vm.username = data.data.UserName;
-					vm.avatarUrl = data.data.Photo;
+					vm.username = data.managerModel.realName;
+					vm.avatarUrl = data.managerModel.avatar;
 				});
 		},
 		computed:{
