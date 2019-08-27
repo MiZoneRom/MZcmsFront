@@ -25,7 +25,7 @@
 			<aside  :class="collapsed?'menu-collapsed':'menu-expanded'">
 				<!-- 导航菜单，未折叠 -->
 				<el-menu router @open="handleopen" @close="handleclose" @select="handleselect" v-if="!collapsed" unique-opened>
-					<template v-for="(item , index) in $router.options.routes" v-if="!item.hidden">
+					<template v-for="(item , index) in route" v-if="!item.hidden">
 						<el-submenu :index="index+''" v-if="!item.leaf">
 							<template slot="title"><i :class="item.iconCls"></i>{{item.name}}</template>
 							<el-menu-item v-for="child in item.children" :key="child.path" :index="child.path" v-if="!child.hidden">{{child.name}}</el-menu-item>
@@ -38,7 +38,7 @@
 				</el-menu>
 				<!-- 导航菜单，折叠 -->
 				<ul class="el-menu" v-else ref="menuCollapsed">
-					<li v-for="(item,index) in $router.options.routes" v-if="!item.hidden" class="reng-menu">
+					<li v-for="(item,index) in route" v-if="!item.hidden" class="reng-menu">
 						<template v-if="item.leaf"><!--叶子结点-->
 							<div @click="$router.push(item.children[0].path)" class="el-menu-item" :class="$route.path==item.children[0].path?'is-active':''">
 								<i :class="item.iconCls"></i>
@@ -82,7 +82,8 @@
 			return {
 				collapsed: false,
 				username: '-',
-				avatarUrl: 'assets/logo.png'
+				avatarUrl: 'assets/logo.png',
+				route:global.antRouter
 			}
 		},
 		methods: {
@@ -117,6 +118,7 @@
 		},
 		created(){
 			let vm = this;
+			console.info(this.route);
 			vm.$fetch(apiPath.USER_INFO)
 				.then(data => {
 					vm.username = data.managerModel.realName;

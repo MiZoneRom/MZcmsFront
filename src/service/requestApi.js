@@ -80,7 +80,7 @@ axios.interceptors.response.use(
 						sessionStorage.setItem("expires", JSON.stringify(res.data.expires));
 						sessionStorage.setItem("refreshExpires", JSON.stringify(res.data.refreshExpires));
 
-				
+
 
 					}).catch(err => { });
 
@@ -149,13 +149,11 @@ export function fetch(url, params = {}) {
 		})
 			.then(response => {
 				resolve(response.data);
-			})
-			.catch(error => {
+			}).catch(error => {
 				reject(error);
 			})
 	})
 }
-
 
 /**
  * Post请求

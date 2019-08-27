@@ -26,37 +26,37 @@ export default new Router({
         }
       ]
     },
-    {
-      path: '/',
-      name: '系统',
-      component: Home,
-      iconCls: 'el-icon-edit',
-      children: [
-        {
-          path: '/SiteSettings',
-          name: '网站设置',
-          meta: '',
-          component: () => import('@/views/manage/SiteSettings')
-        }
-      ]
-    },
+    // {
+    //   path: '/',
+    //   name: '系统',
+    //   component: Home,
+    //   iconCls: 'el-icon-edit',
+    //   children: [
+    //     {
+    //       path: '/SiteSettings',
+    //       name: '网站设置',
+    //       meta: '',
+    //       component: () => import('@/views/manage/SiteSettings')
+    //     }
+    //   ]
+    // },
     {
       path: '/Login',
       name: 'Login',
       hidden: true, // 左侧导航栏中隐藏
       component: () => import('@/views/Login'),
       iconCls: 'el-icon-message',//图标样式class
-    },
-    {
-      path: '/404',
-      name: '404',
-      component: NotFound,
-      hidden: true
-    },
-    {
-      path: '*',
-      hidden: true,
-      redirect: { path: '/404' }
-    }
+    }//,
+    // {
+    //   path: '/404',
+    //   name: '404',
+    //   component: NotFound,
+    //   hidden: true
+    // },
+    // {
+    //   path: '*',
+    //   hidden: true,
+    //   redirect: { path: '/404' }
+    // }
   ]
 })
