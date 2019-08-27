@@ -27,26 +27,26 @@ import '@/utils/filters'
 import store from './store/index'
 
 // use axios
-import {post,fetch,patch,put} from './service/requestApi.js'
-Vue.prototype.$post=post;
-Vue.prototype.$fetch=fetch;
-Vue.prototype.$patch=patch;
-Vue.prototype.$put=put;
+import { post, fetch, patch, put } from './service/requestApi.js'
+Vue.prototype.$post = post;
+Vue.prototype.$fetch = fetch;
+Vue.prototype.$patch = patch;
+Vue.prototype.$put = put;
 
 Vue.use(ElementUI)
 Vue.use(VueRouter)
 
 // handle admin, should release
-router.beforeEach((to,from,next) => {
+router.beforeEach((to, from, next) => {
 
-	if(to.path == '/login'){
+	if (to.path == '/login') {
 		sessionStorage.removeItem('Admin');
-  }
-  
+	}
+
 	let user = JSON.parse(sessionStorage.getItem('Admin'));
-	if(!user && to.path != '/Login'){
-		next({path: '/Login'});
-	} else{
+	if (!user && to.path != '/Login') {
+		next({ path: '/Login' });
+	} else {
 		next();
 	}
 })
@@ -59,5 +59,4 @@ new Vue({
 	store,
 	// components: { App }
 	render: h => h(App)
-  }).$mount('#app');
-  
+}).$mount('#app');

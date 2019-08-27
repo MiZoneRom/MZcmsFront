@@ -77,6 +77,8 @@ export default {
           sessionStorage.setItem("Admin", JSON.stringify(vm.form.username));
           sessionStorage.setItem("token", JSON.stringify(data.data.token));
           sessionStorage.setItem("refreshToken", JSON.stringify(data.data.refreshToken));
+          sessionStorage.setItem("expires", JSON.stringify(data.data.expires));
+          sessionStorage.setItem("refreshExpires", JSON.stringify(data.data.refreshExpires));
           vm.$router.push({ path: "/" });
 
         });

@@ -11,10 +11,13 @@ window.isReresh = false;
 axios.interceptors.request.use(
 	config => {
 
-		config.data = JSON.stringify(config.data);
-		config.headers = {
-			'Content-Type': 'application/x-www-form-urlencoded'
-		}
+		//影响后端接受json
+
+		//config.data = JSON.stringify(config.data);
+
+		// config.headers = {
+		// 	'Content-Type': 'application/x-www-form-urlencoded'
+		// }
 
 		const token = JSON.parse(sessionStorage.getItem('token'));
 
@@ -44,31 +47,45 @@ axios.interceptors.response.use(
 
 		//获取Token
 		const token = JSON.parse(sessionStorage.getItem('token'));
-		const resetTime = sessionStorage.getItem('resetTime');
+		const expires = parseInt(JSON.parse(sessionStorage.getItem('expires')));
+		const refresh_token = JSON.parse(sessionStorage.getItem('refreshToken'));
+		var timestamp = (new Date()).valueOf();
 
 		if (token) {
 
-			//更新过期时间
-			isRefreshTokenExpired(resetTime);
+			var timeSpan = expires - timestamp;
 
-			//如果时间小于20分种
-			if (resetTime < 1200) {
+			console.info('token get countdown:' + timeSpan);
+
+			//如果时间小于10分种
+			if (timeSpan < 60000) {
+
 				if (!window.isReresh) {
 
 					window.isReresh = true;
-					let refresh_token = sessionStorage.getItem('refreshToken');
 
-					getRefreshToken(refresh_token).then(res => {
+					let refreshData = {
+						token: token,
+						refresh_token: refresh_token
+					};
+
+					getRefreshToken(refreshData).then(res => {
+
+						console.info(res);
+
 						window.isReresh = false;
-						isRefreshTokenExpired(res.data.resetTime);// 重新获取的token有效时间
-						store.commit('changeLogin', {//vuex中修改相关信息
-							Authorization: res.data.access_token,
-							token_type: res.data.token_type,
-							refresh_token: res.data.refresh_token,
-						});
+
+						sessionStorage.setItem("token", JSON.stringify(res.data.token));
+						sessionStorage.setItem("refreshToken", JSON.stringify(res.data.refreshToken));
+						sessionStorage.setItem("expires", JSON.stringify(res.data.expires));
+						sessionStorage.setItem("refreshExpires", JSON.stringify(res.data.refreshExpires));
+
+				
+
 					}).catch(err => { });
 
 				}
+
 			}
 
 

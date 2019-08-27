@@ -54,7 +54,6 @@
 						</template>
 					</li>
 				</ul>
-				</el-menu>
 			</aside>
 			<section class="content-container">
 				<div class="grid-content bg-purple-light">
@@ -83,7 +82,7 @@
 			return {
 				collapsed: false,
 				username: '-',
-				avatarUrl: 'http://pic.58pic.com/58pic/14/64/56/25h58PIC3eG_1024.jpg'
+				avatarUrl: 'assets/logo.png'
 			}
 		},
 		methods: {
@@ -121,7 +120,7 @@
 			vm.$fetch(apiPath.USER_INFO)
 				.then(data => {
 					vm.username = data.managerModel.realName;
-					vm.avatarUrl = data.managerModel.avatar;
+					vm.avatarUrl = data.managerModel.avatar==null?'/static/logo.png':data.managerModel.avatar;
 				});
 		},
 		computed:{
