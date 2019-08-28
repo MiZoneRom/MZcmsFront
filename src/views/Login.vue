@@ -74,7 +74,7 @@ export default {
             return;
           }
 
-          sessionStorage.setItem("Admin", JSON.stringify(vm.form.username));
+          sessionStorage.setItem("admin", JSON.stringify(vm.form.username));
           sessionStorage.setItem("token", JSON.stringify(data.data.token));
           sessionStorage.setItem("refreshToken", JSON.stringify(data.data.refreshToken));
           sessionStorage.setItem("expires", JSON.stringify(data.data.expires));

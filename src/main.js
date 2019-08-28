@@ -46,19 +46,23 @@ Vue.use(VueRouter)
 
 var getRouter //用来获取后台拿到的路由
 
-// handle admin, should release
+
 router.beforeEach((to, from, next) => {
 
+	//如果前往登录 清空登录信息
 	if (to.path == '/login') {
-		sessionStorage.removeItem('Admin');
+		sessionStorage.removeItem('admin');
 	}
 
-	let user = JSON.parse(sessionStorage.getItem('Admin'));
+	//获取用户信息
+	let user = JSON.parse(sessionStorage.getItem('admin'));
+
+	//如果用户过期且没有前往登录
 	if (!user && to.path != '/Login') {
 
 		next({ path: '/Login' });
 
-	} else if (!getRouter) {
+	} else if (!getRouter) {//如果没有导航信息
 
 		if (!getObjArr('router')) {
 			axios.get(apiPath.NAVIGATION).then(res => {

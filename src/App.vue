@@ -36,4 +36,8 @@ body {
 .fade-leave-active {
   opacity: 0;
 }
+
+.el-scrollbar__wrap {
+  overflow-x: auto;
+}
 </style>

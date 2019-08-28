@@ -1,46 +1,24 @@
 <template>
-	<div id="welcome">
-		<p>{{username}}</p>
-		<h3>welcome to this platform</h3>
-	</div>
+  <el-card class="box-card">
+    <div slot="header" class="clearfix">
+      <span>卡片名称</span>
+      <el-button style="float: right; padding: 3px 0" type="text">操作按钮</el-button>
+    </div>
+    <div v-for="o in 100" :key="o" class="text item">{{'列表内容 ' + o }}</div>
+  </el-card>
 </template>
 <script>
-	// import apiPath from '@/service/apiPath'
-	// import * as d3 from 'd3'
-	export default {
-		data() {
-			return {
-				username: ''
-			}
-		},
-		methods: {
-
-		},
-		created(){
-			this.username = JSON.parse(sessionStorage.getItem('Admin'));
-			// let vm = this;
-			// let username = JSON.parse(sessionStorage.getItem('user'));
-			// vm.$fetch('https://api.github.com/search/repositories?q=language:JavaScript&sort=stars&order=desc')
-			// 	.then(data => {
-			// 		let i = 0;
-			// 		data.items.forEach(item => {
-			// 			console.log('第'+(++i)+'名：'+item.name+' - '+item.stargazers_count);
-			// 		})
-			// 	});
-			// this.$nextTick(function(){
-			// 	d3.select("body").transition()
-    		// 		.styleTween("color", function() { return d3.interpolate("green", "red"); });
-			// });
-		}
-	}
+export default {
+  data() {
+    return {
+      username: ""
+    };
+  },
+  methods: {},
+  created() {
+    this.username = JSON.parse(sessionStorage.getItem("admin"));
+  }
+};
 </script>
 <style lang='less' scoped>
-	#welcome{
-		text-align: center;
-		color: #409EFF;
-		p{
-			font-size: 16px;
-			font-weight: bolder;
-		}
-	}
 </style>
