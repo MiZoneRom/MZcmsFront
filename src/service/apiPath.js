@@ -1,5 +1,5 @@
 // 使用线上地址 
-let apiUrl = 'http://127.0.0.1:6060/api/admin'
+let apiUrl = process.env.VUE_APP_SERVICE_URL;
 
 export default {
 	'LOGIN': apiUrl + '/Login',//登录

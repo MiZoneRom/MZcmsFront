@@ -3,12 +3,15 @@ import { Message } from 'element-ui'
 import { getRefreshToken, isRefreshTokenExpired } from '../helper/tokenHelper'
 import router from '../router'
 
-axios.default.timeout = 5000
-axios.default.baseURL = ''
+let request = axios.create({
+	baseURL:process.env.VUE_APP_BASE_API,
+	timeout: 5000
+})
+
 window.isReresh = false;
 
 // http request 拦截器
-axios.interceptors.request.use(
+request.interceptors.request.use(
 	config => {
 
 		//影响后端接受json
@@ -33,7 +36,7 @@ axios.interceptors.request.use(
 );
 
 // http response 拦截器
-axios.interceptors.response.use(
+request.interceptors.response.use(
 	response => {
 
 		//如果登录失效
@@ -144,7 +147,7 @@ axios.interceptors.response.use(
 */
 export function fetch(url, params = {}) {
 	return new Promise((resolve, reject) => {
-		axios.get(url, {
+		request.get(url, {
 			params: params
 		})
 			.then(response => {
@@ -163,7 +166,7 @@ export function fetch(url, params = {}) {
  */
 export function post(url, data = {}) {
 	return new Promise((resolve, reject) => {
-		axios.post(url, data)
+		request.post(url, data)
 			.then(response => {
 				resolve(response.data);
 			}, error => {
@@ -181,7 +184,7 @@ export function post(url, data = {}) {
 */
 export function patch(url, data = {}) {
 	return new Promise((resolve, reject) => {
-		axios.patch(url, data)
+		request.patch(url, data)
 			.then(response => {
 				resolve(response.data);
 			}, error => {
@@ -199,7 +202,7 @@ export function patch(url, data = {}) {
 */
 export function put(url, data = {}) {
 	return new Promise((resolve, reject) => {
-		axios.put(url, data)
+		request.put(url, data)
 			.then(response => {
 				resolve(response.data);
 			}, error => {

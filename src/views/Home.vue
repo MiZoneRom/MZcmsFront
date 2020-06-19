@@ -8,6 +8,9 @@
           @open="handleOpen"
           @close="handleClose"
           :collapse="isCollapse"
+          background-color="#545c64"
+          text-color="#fff"
+          active-text-color="#ffd04b"
         >
           <template v-for="(item , index) in route" v-if="!item.hidden">
             <el-submenu :index="index+''" v-if="!item.leaf">
@@ -179,16 +182,20 @@ export default {
       bottom: 0;
       left: 0;
       right: 0;
+      .el-scrollbar__wrap{
+        overflow: auto;
+      }
       .el-scrollbar {
         width: 100%;
       }
       .content-wrapper {
         flex: 1;
-        padding: 20px;
+        padding: 10px;
         .breadcrumb-container {
           padding: 10px;
           .title {
             max-width: 300px;
+            font-size: 18px;
             float: left;
           }
           .breadcrumb-inner {
