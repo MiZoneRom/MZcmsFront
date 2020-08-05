@@ -30,6 +30,8 @@ import store from './store/index'
 
 import apiPath from "@/service/apiPath";
 
+import cacheKeyCollection from "@/service/cacheKeyCollection";
+
 import Home from '@/views/Home'
 
 const _import = require('./router/_import_' + process.env.NODE_ENV)
@@ -44,8 +46,10 @@ Vue.prototype.$put = put;
 Vue.use(ElementUI)
 Vue.use(VueRouter)
 
-var getRouter //用来获取后台拿到的路由
-var getSiteSettings;
+//用来获取后台拿到的路由
+var siteRouter;
+//系统配置
+var siteSettings;
 
 router.beforeEach(async (to, from, next) => {
 
@@ -57,19 +61,30 @@ router.beforeEach(async (to, from, next) => {
 	//获取用户信息
 	let user = JSON.parse(sessionStorage.getItem('admin'));
 
-	if (!getObjArr('siteSettings') || !getSiteSettings) {
-		getSiteSettings = await axios.get(apiPath.SITE_SETTINGS);
+	//获取系统配置
+	if (!siteSettings) {
+		if (!getLocalStorage(cacheKeyCollection.SITE_SETTINGS)) {
+			var remoteSiteSettings = await axios.get(apiPath.SITE_SETTINGS);
+			siteSettings = remoteSiteSettings.data.data;
+			saveLocalStorage(cacheKeyCollection.SITE_SETTINGS, siteSettings);
+		} else {
+			siteSettings = getLocalStorage(cacheKeyCollection.SITE_SETTINGS);
+		}
 	}
 
-	if (!getRouter) {
-		if (!getObjArr('router')) {
-			var _getRouter = await axios.get(apiPath.NAVIGATION);
-			getRouter = _getRouter.data.router;
-			saveObjArr('router', getRouter) //存储路由到localStorage
-			routerGo(to, next)//执行路由跳转方法
+	//获取系统路由
+	if (!siteRouter) {
+		if (!getLocalStorage(cacheKeyCollection.ROUTER)) {
+			var remoteRouter = await axios.get(apiPath.NAVIGATION);
+			siteRouter = remoteRouter.data.data;
+			//存储路由到localStorage
+			saveLocalStorage(cacheKeyCollection.ROUTER, siteRouter);
+			//执行路由跳转方法
+			routerGo(to, next);
 		} else {//从localStorage拿到了路由
-			getRouter = getObjArr('router')//拿到路由
-			routerGo(to, next)
+			//拿到路由
+			siteRouter = getLocalStorage(cacheKeyCollection.ROUTER);
+			routerGo(to, next);
 		}
 	}
 
@@ -83,18 +98,20 @@ router.beforeEach(async (to, from, next) => {
 })
 
 function routerGo(to, next) {
-	getRouter = filterAsyncRouter(getRouter) //过滤路由
-	router.addRoutes(getRouter) //动态添加路由
+	siteRouter = filterAsyncRouter(siteRouter) //过滤路由
+	router.addRoutes(siteRouter) //动态添加路由
 	router.addRoutes([{ path: '*', redirect: '/404', hidden: true }]);//添加动态路由后再添加404页面
-	global.antRouter = getRouter //将路由数据传递给全局变量，做侧边栏菜单渲染工作
+	global.antRouter = siteRouter //将路由数据传递给全局变量，做侧边栏菜单渲染工作
 	next({ ...to, replace: true })
 }
 
-function saveObjArr(name, data) { //localStorage 存储数组对象的方法
+//保存本地储存
+function saveLocalStorage(name, data) { //localStorage 存储数组对象的方法
 	localStorage.setItem(name, JSON.stringify(data))
 }
 
-function getObjArr(name) { //localStorage 获取数组对象的方法
+//获取本地储存
+function getLocalStorage(name) { //localStorage 获取数组对象的方法
 	return JSON.parse(window.localStorage.getItem(name));
 }
 
