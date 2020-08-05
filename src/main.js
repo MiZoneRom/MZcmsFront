@@ -45,9 +45,9 @@ Vue.use(ElementUI)
 Vue.use(VueRouter)
 
 var getRouter //用来获取后台拿到的路由
+var getSiteSettings;
 
-
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
 
 	//如果前往登录 清空登录信息
 	if (to.path == '/login') {
@@ -57,27 +57,29 @@ router.beforeEach((to, from, next) => {
 	//获取用户信息
 	let user = JSON.parse(sessionStorage.getItem('admin'));
 
-	//如果用户过期且没有前往登录
-	if (!user && to.path != '/Login') {
+	if (!getObjArr('siteSettings') || !getSiteSettings) {
+		getSiteSettings = await axios.get(apiPath.SITE_SETTINGS);
+	}
 
-		next({ path: '/Login' });
-
-	} else if (!getRouter) {//如果没有导航信息
-
+	if (!getRouter) {
 		if (!getObjArr('router')) {
-			axios.get(apiPath.NAVIGATION).then(res => {
-				getRouter = res.data.router//后台拿到路由
-				saveObjArr('router', getRouter) //存储路由到localStorage
-				routerGo(to, next)//执行路由跳转方法
-			});
+			var _getRouter = await axios.get(apiPath.NAVIGATION);
+			getRouter = _getRouter.data.router;
+			saveObjArr('router', getRouter) //存储路由到localStorage
+			routerGo(to, next)//执行路由跳转方法
 		} else {//从localStorage拿到了路由
 			getRouter = getObjArr('router')//拿到路由
 			routerGo(to, next)
 		}
+	}
 
+	//如果用户过期且没有前往登录
+	if (!user && to.path != '/Login') {
+		next({ path: '/Login' });
 	} else {
 		next();
 	}
+
 })
 
 function routerGo(to, next) {
@@ -97,7 +99,6 @@ function getObjArr(name) { //localStorage 获取数组对象的方法
 }
 
 function filterAsyncRouter(asyncRouterMap) { //遍历后台传来的路由字符串，转换为组件对象
-
 	const accessedRouters = asyncRouterMap.filter(route => {
 		if (route.component) {
 			if (route.component === 'Layout') {//Layout组件特殊处理
@@ -111,11 +112,9 @@ function filterAsyncRouter(asyncRouterMap) { //遍历后台传来的路由字符
 		}
 		return true
 	});
-
 	return accessedRouters
 }
 
-/* eslint-disable no-new */
 new Vue({
 	// el: '#app',
 	// template: '<App/>',
