@@ -43,8 +43,7 @@
             <el-menu-item index="2">消息中心</el-menu-item>
             <el-submenu index="3">
               <template slot="title">
-                <el-avatar icon="el-icon-user-solid"></el-avatar>
-                <img style="width:20px;" :src="avatarUrl" />
+                <el-avatar icon="el-icon-user-solid" :src="avatarUrl"></el-avatar>
                 {{username}}
               </template>
               <el-menu-item index="3-1" @click.native="$router.push('/profile')">个人主页</el-menu-item>
@@ -91,7 +90,7 @@ export default {
     return {
       isCollapse: false,
       username: "-",
-      avatarUrl: "assets/logo.png",
+      avatarUrl: "",
       route: global.antRouter
     };
   },
@@ -136,7 +135,7 @@ export default {
       vm.username = data.managerModel.realName;
       vm.avatarUrl =
         data.managerModel.avatar == null
-          ? "/static/logo.png"
+          ? ""
           : data.managerModel.avatar;
     });
   },
