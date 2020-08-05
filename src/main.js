@@ -75,16 +75,17 @@ router.beforeEach(async (to, from, next) => {
 	//获取系统路由
 	if (!siteRouter) {
 		if (!getLocalStorage(cacheKeyCollection.ROUTER)) {
+			//从后台获取路由
 			var remoteRouter = await axios.get(apiPath.NAVIGATION);
-			siteRouter = remoteRouter.data.data;
+			var siteRouterData = remoteRouter.data.data;
 			//存储路由到localStorage
-			saveLocalStorage(cacheKeyCollection.ROUTER, siteRouter);
+			saveLocalStorage(cacheKeyCollection.ROUTER, siteRouterData);
 			//执行路由跳转方法
-			routerGo(to, next);
+			initRouter(siteRouterData, to, next);
 		} else {//从localStorage拿到了路由
 			//拿到路由
-			siteRouter = getLocalStorage(cacheKeyCollection.ROUTER);
-			routerGo(to, next);
+			var siteRouterData = getLocalStorage(cacheKeyCollection.ROUTER);
+			initRouter(siteRouterData, to, next);
 		}
 	}
 
@@ -95,19 +96,20 @@ router.beforeEach(async (to, from, next) => {
 		next();
 	}
 
-})
+});
 
-function routerGo(to, next) {
-	siteRouter = filterAsyncRouter(siteRouter) //过滤路由
-	router.addRoutes(siteRouter) //动态添加路由
+//初始化路由
+function initRouter(data, to, next) {
+	siteRouter = filterAsyncRouter(data); //过滤路由
+	router.addRoutes(siteRouter); //动态添加路由
 	router.addRoutes([{ path: '*', redirect: '/404', hidden: true }]);//添加动态路由后再添加404页面
 	global.antRouter = siteRouter //将路由数据传递给全局变量，做侧边栏菜单渲染工作
-	next({ ...to, replace: true })
+	next({ ...to, replace: true });
 }
 
 //保存本地储存
 function saveLocalStorage(name, data) { //localStorage 存储数组对象的方法
-	localStorage.setItem(name, JSON.stringify(data))
+	localStorage.setItem(name, JSON.stringify(data));
 }
 
 //获取本地储存
@@ -115,21 +117,22 @@ function getLocalStorage(name) { //localStorage 获取数组对象的方法
 	return JSON.parse(window.localStorage.getItem(name));
 }
 
-function filterAsyncRouter(asyncRouterMap) { //遍历后台传来的路由字符串，转换为组件对象
+//遍历后台传来的路由字符串，转换为组件对象
+function filterAsyncRouter(asyncRouterMap) {
 	const accessedRouters = asyncRouterMap.filter(route => {
 		if (route.component) {
 			if (route.component === 'Layout') {//Layout组件特殊处理
-				route.component = Home
+				route.component = Home;
 			} else {
-				route.component = _import(route.component)
+				route.component = _import(route.component);
 			}
 		}
 		if (route.children && route.children.length) {
-			route.children = filterAsyncRouter(route.children)
+			route.children = filterAsyncRouter(route.children);
 		}
-		return true
+		return true;
 	});
-	return accessedRouters
+	return accessedRouters;
 }
 
 new Vue({
