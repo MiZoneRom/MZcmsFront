@@ -4,7 +4,7 @@ import { getRefreshToken, isRefreshTokenExpired } from '../helper/tokenHelper'
 import router from '../router'
 
 let request = axios.create({
-	baseURL:process.env.VUE_APP_BASE_API,
+	baseURL: process.env.VUE_APP_BASE_API,
 	timeout: 5000
 })
 
@@ -149,6 +149,9 @@ export function fetch(url, params = {}) {
 	return new Promise((resolve, reject) => {
 		request.get(url, {
 			params: params
+		}, {
+			responseType: 'json',
+			withCredentials: true
 		})
 			.then(response => {
 				resolve(response.data);
@@ -166,7 +169,10 @@ export function fetch(url, params = {}) {
  */
 export function post(url, data = {}) {
 	return new Promise((resolve, reject) => {
-		request.post(url, data)
+		request.post(url, data, {
+			responseType: 'json',
+			withCredentials: true
+		})
 			.then(response => {
 				resolve(response.data);
 			}, error => {
@@ -184,7 +190,10 @@ export function post(url, data = {}) {
 */
 export function patch(url, data = {}) {
 	return new Promise((resolve, reject) => {
-		request.patch(url, data)
+		request.patch(url, data, {
+			responseType: 'json',
+			withCredentials: true
+		})
 			.then(response => {
 				resolve(response.data);
 			}, error => {
@@ -202,7 +211,10 @@ export function patch(url, data = {}) {
 */
 export function put(url, data = {}) {
 	return new Promise((resolve, reject) => {
-		request.put(url, data)
+		request.put(url, data, {
+			responseType: 'json',
+			withCredentials: true
+		})
 			.then(response => {
 				resolve(response.data);
 			}, error => {

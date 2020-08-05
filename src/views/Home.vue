@@ -43,6 +43,7 @@
             <el-menu-item index="2">消息中心</el-menu-item>
             <el-submenu index="3">
               <template slot="title">
+                <el-avatar icon="el-icon-user-solid"></el-avatar>
                 <img style="width:20px;" :src="avatarUrl" />
                 {{username}}
               </template>
