@@ -15,9 +15,7 @@ request.interceptors.request.use(
 	config => {
 
 		//影响后端接受json
-
 		//config.data = JSON.stringify(config.data);
-
 		// config.headers = {
 		// 	'Content-Type': 'application/x-www-form-urlencoded'
 		// }

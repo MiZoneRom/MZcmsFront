@@ -23,6 +23,7 @@
                 :key="child.path"
                 :index="child.path"
                 v-if="!child.hidden"
+                @click="$router.push(child.path)"
               >{{child.name}}</el-menu-item>
             </el-submenu>
             <!-- 叶子结点 -->
