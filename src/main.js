@@ -37,9 +37,9 @@ import Home from '@/views/Home'
 const _import = require('./router/_import_' + process.env.NODE_ENV)
 
 // use axios
-import { post, fetch, patch, put } from './service/requestApi.js'
+import { post, get, patch, put } from './service/requestApi.js'
 Vue.prototype.$post = post;
-Vue.prototype.$fetch = fetch;
+Vue.prototype.$get = get;
 Vue.prototype.$patch = patch;
 Vue.prototype.$put = put;
 

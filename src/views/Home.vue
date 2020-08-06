@@ -1,29 +1,32 @@
 <template>
   <el-row class="container">
-    <el-col class="main" :span="24">
+    <el-col class="main" :span="24" :class="isCollapse?'menu-collapsed':'menu-expanded'">
       <div class="header">
         <el-menu class="el-menu-demo" mode="horizontal">
-          <el-menu-item index="1" @click="collapse" class="logo">
+          <el-menu-item index="1" class="logo">
             <img src="/static/logo.png" />
-            MCS
+            <span>MCS</span>
           </el-menu-item>
-          <el-menu-item index="1" @click="collapse">
-            <i class="el-icon-setting"></i>
+          <el-menu-item index="2" @click="collapse">
+            <i :class="isCollapse?'el-icon-more-outline':'el-icon-more'"></i>
           </el-menu-item>
-          <el-menu-item index="2">消息中心</el-menu-item>
-          <el-submenu index="3">
+          <el-menu-item index="3" class="pull-right">消息中心</el-menu-item>
+          <el-submenu index="4" class="pull-right">
             <template slot="title">
               <el-avatar icon="el-icon-user-solid" :src="avatarUrl"></el-avatar>
               {{username}}
             </template>
-            <el-menu-item index="3-1" @click.native="$router.push('/profile')">个人主页</el-menu-item>
+            <el-menu-item
+              index="3-1"
+              @click.native="$router.push('/profile')"
+            >个人主页</el-menu-item>
             <el-menu-item index="3-2" @click.native="logout">退出登录</el-menu-item>
           </el-submenu>
         </el-menu>
       </div>
 
       <section class="content-container">
-        <aside :class="isCollapse?'menu-collapsed':'menu-expanded'">
+        <aside>
           <el-menu
             default-active="1-4-1"
             class="el-menu-vertical"
@@ -33,12 +36,13 @@
             background-color="#ffffff"
             text-color="#505050"
             active-text-color="#0081ff"
+            collapse-transition
           >
             <template v-for="(item , index) in route" v-if="!item.hidden">
               <el-submenu :index="index+''" v-if="!item.leaf">
                 <template slot="title">
-                  <i :class="item.iconCls"></i>
-                  <span slot="title">{{item.name}}</span>
+                  <i :class="'menu-icon '+item.iconCls"></i>
+                  <span slot="title" class="menu-text">{{item.name}}</span>
                 </template>
                 <el-menu-item
                   v-for="child in item.children"
@@ -90,64 +94,6 @@
   </el-row>
 </template>
 
-<script type="text/javascript">
-import apiPath from "@/service/apiPath";
-export default {
-  data() {
-    return {
-      isCollapse: false,
-      username: "-",
-      avatarUrl: "",
-      route: global.antRouter,
-    };
-  },
-  methods: {
-    // collapse banner
-    collapse() {
-      this.isCollapse = !this.isCollapse;
-    },
-    handleOpen() {
-      console.log("handleopen");
-    },
-    handleClose() {
-      console.log("handleclose");
-    },
-    handleselect() {
-      console.log("handleselect");
-    },
-    showMenu(i, status) {
-      console.log(i);
-      this.$refs.menuCollapsed.getElementsByClassName(
-        "submenu-hook-" + i
-      )[0].style.display = status ? "block" : "none";
-    },
-    logout() {
-      let vm = this;
-      vm.$confirm("确认退出吗?", "提示", {
-        type: "warning",
-      })
-        .then(() => {
-          sessionStorage.removeItem("admin");
-          vm.$router.push({ path: "/login" });
-        })
-        .catch(() => {
-          console.log("error");
-        });
-    },
-  },
-  created() {
-    let vm = this;
-    console.info(this.route);
-    vm.$fetch(apiPath.USER_INFO).then((data) => {
-      vm.username = data.managerModel.realName;
-      vm.avatarUrl =
-        data.managerModel.avatar == null ? "" : data.managerModel.avatar;
-    });
-  },
-  computed: {},
-};
-</script>
-
 <style lang="less" scoped>
 @import "../styles/public.less";
 .container {
@@ -155,11 +101,43 @@ export default {
   top: 0;
   bottom: 0;
   width: 100%;
+
   .main {
     display: flex;
     position: absolute;
     top: 0;
     bottom: 0;
+
+    &.menu-collapsed {
+      .header {
+        .logo {
+          width: 65px;
+          span {
+            opacity: 0;
+          }
+          img {
+            height: 30px;
+            width: 30px;
+          }
+        }
+      }
+      .content-container {
+        aside {
+          width: 65px;
+          .menu-text {
+            display: none;
+          }
+          .menu-icon {
+            font-size: 20px;
+          }
+        }
+        .content-body {
+          .content {
+            padding-left: 65px;
+          }
+        }
+      }
+    }
 
     .header {
       display: flex;
@@ -171,10 +149,15 @@ export default {
       z-index: 1;
       .logo {
         width: 250px;
+        transition: all 0.3s;
         img {
-          height: 100%;
-          width: auto;
+          height: 50px;
+          width: 50px;
+          transition: all 0.3s;
         }
+      }
+      .pull-right {
+        float: right;
       }
       .el-menu-demo {
         width: 100%;
@@ -186,12 +169,13 @@ export default {
       display: flex;
 
       aside {
-        width: 320px;
+        width: 250px;
         position: fixed;
         left: 0;
         bottom: 0;
         top: 60px;
         box-shadow: 0 4px 25px 0 rgba(0, 0, 0, 0.1);
+        transition: all 0.3s;
         .el-menu-vertical {
           height: 100%;
         }
@@ -210,9 +194,10 @@ export default {
           -webkit-box-flex: 1;
           flex: 1;
           padding: 30px;
-          padding-top: 105px;
-          padding-left: 350px;
+          padding-top: 60px;
+          padding-left: 250px;
           padding-bottom: 0;
+          transition: all 0.3s;
 
           .el-scrollbar__wrap {
             overflow: auto;
@@ -249,3 +234,63 @@ export default {
   }
 }
 </style>
+
+<script type="text/javascript">
+import apiPath from "@/service/apiPath";
+export default {
+  data() {
+    return {
+      isCollapse: false,
+      username: "-",
+      avatarUrl: "",
+      route: global.antRouter,
+    };
+  },
+  methods: {
+    // collapse banner
+    collapse() {
+      this.isCollapse = !this.isCollapse;
+    },
+    handleOpen() {
+      console.log("handleopen");
+    },
+    handleClose() {
+      console.log("handleclose");
+    },
+    handleselect() {
+      console.log("handleselect");
+    },
+    showMenu(i, status) {
+      console.log(i);
+      this.$refs.menuCollapsed.getElementsByClassName(
+        "submenu-hook-" + i
+      )[0].style.display = status ? "block" : "none";
+    },
+    logout() {
+      let vm = this;
+
+      vm.$confirm("确认退出吗?", "提示", {
+        type: "warning",
+      })
+        .then(() => {
+          sessionStorage.removeItem("admin");
+          vm.$router.push({ path: "/login" });
+        })
+        .catch(() => {
+          console.log("error");
+        });
+    },
+  },
+  created() {
+    let vm = this;
+    console.info(this.route);
+    vm.$get(apiPath.USER_INFO).then((data) => {
+      vm.username = data.managerModel.realName;
+      vm.avatarUrl =
+        data.managerModel.avatar == null ? "" : data.managerModel.avatar;
+    });
+  },
+  computed: {},
+};
+</script>
+

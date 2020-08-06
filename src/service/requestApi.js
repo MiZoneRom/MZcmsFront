@@ -14,16 +14,10 @@ window.isReresh = false;
 request.interceptors.request.use(
 	config => {
 
-		//影响后端接受json
-		//config.data = JSON.stringify(config.data);
-		// config.headers = {
-		// 	'Content-Type': 'application/x-www-form-urlencoded'
-		// }
+		var token = sessionStorage.getItem('token');
 
-		const token = JSON.parse(sessionStorage.getItem('token'));
-
-		if (token) {
-			config.headers.Authorization = 'Bearer ' + token;
+		if (token != 'undefined' && token) {
+			config.headers.Authorization = 'Bearer ' + JSON.parse(token);
 		}
 
 		return config;
@@ -72,16 +66,31 @@ request.interceptors.response.use(
 
 					getRefreshToken(refreshData).then(res => {
 
+						console.info('aaaaaaaaaaaaaaa');
 						console.info(res);
 
-						window.isReresh = false;
+						//如果获取成功
+						if (res.success) {
+							window.isReresh = false;
 
-						sessionStorage.setItem("token", JSON.stringify(res.data.token));
-						sessionStorage.setItem("refreshToken", JSON.stringify(res.data.refreshToken));
-						sessionStorage.setItem("expires", JSON.stringify(res.data.expires));
-						sessionStorage.setItem("refreshExpires", JSON.stringify(res.data.refreshExpires));
-
-
+							sessionStorage.setItem("token", JSON.stringify(res.data.token));
+							sessionStorage.setItem("refreshToken", JSON.stringify(res.data.refreshToken));
+							sessionStorage.setItem("expires", JSON.stringify(res.data.expires));
+							sessionStorage.setItem("refreshExpires", JSON.stringify(res.data.refreshExpires));
+						} else {
+							Message({
+								type: 'warning',
+								message: res.msg,
+								duration: 1500
+							});
+							//跳转到登录
+							router.replace({
+								path: '/Login',
+								query: {
+									redirect: router.currentRoute.fullPath
+								}
+							});
+						}
 
 					}).catch(err => { });
 
@@ -142,13 +151,10 @@ request.interceptors.response.use(
 * @param data
 * @return {Promise}
 */
-export function fetch(url, params = {}) {
+export function get(url, params = {}) {
 	return new Promise((resolve, reject) => {
 		request.get(url, {
 			params: params
-		}, {
-			responseType: 'json',
-			withCredentials: true
 		})
 			.then(response => {
 				resolve(response.data);
@@ -166,16 +172,13 @@ export function fetch(url, params = {}) {
  */
 export function post(url, data = {}) {
 	return new Promise((resolve, reject) => {
-		request.post(url, data, {
-			responseType: 'json',
-			withCredentials: true
-		})
+		request.post(url, data)
 			.then(response => {
 				resolve(response.data);
 			}, error => {
 				reject(error)
 			})
-	})
+	});
 }
 
 

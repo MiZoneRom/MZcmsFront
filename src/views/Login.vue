@@ -56,7 +56,7 @@ export default {
         });
       } else {
         vm.logining = true;
-        vm.$fetch(
+        vm.$get(
           apiPath.LOGIN +
             "?username=" +
             vm.form.username +
