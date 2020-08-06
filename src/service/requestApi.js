@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { Message } from 'element-ui'
-import { getRefreshToken, isRefreshTokenExpired } from '../helper/tokenHelper'
+import { getRefreshToken } from '../helper/tokenHelper'
 import router from '../router'
 
 let request = axios.create({
@@ -8,7 +8,11 @@ let request = axios.create({
 	timeout: 5000
 })
 
-window.isReresh = false;
+
+// 配置通用请求动画
+let isRefreshing = false;
+// 重试队列，每一项将是一个待执行的函数形式
+let requests = [];
 
 // http request 拦截器
 request.interceptors.request.use(
@@ -28,83 +32,109 @@ request.interceptors.request.use(
 );
 
 // http response 拦截器
-request.interceptors.response.use(
-	response => {
+request.interceptors.response.use(async response => {
 
-		//如果登录失效
-		if (response.data.code == 2) {
-			router.push({
-				path: "/Login",
-				querry: { redirect: router.currentRoute.fullPath }//从哪个页面跳转
-			})
-			return response;
-		}
+	//请求状态
+	var status = response.status;
+
+	//如果登录失效
+	if (response.data.code == 2) {
+		router.push({
+			path: "/Login",
+			querry: { redirect: router.currentRoute.fullPath }//从哪个页面跳转
+		})
+		return response;
+	}
+
+	//如果请求正常
+	if (status == 200) {
+		return response;
+	} else if (status == 402) {
 
 		//获取Token
 		const token = JSON.parse(sessionStorage.getItem('token'));
 		const expires = parseInt(JSON.parse(sessionStorage.getItem('expires')));
 		const refresh_token = JSON.parse(sessionStorage.getItem('refreshToken'));
-		var timestamp = (new Date()).valueOf();
 
-		if (token) {
+		if (!isRefreshing) {
 
-			var timeSpan = expires - timestamp;
+			isRefreshing = true;
 
-			console.info('token get countdown:' + timeSpan);
+			let refreshData = {
+				token: token,
+				refresh_token: refresh_token
+			};
 
-			//如果时间小于10分种
-			if (timeSpan < 60000) {
+			var tokenResult = await getRefreshToken(refreshData);
 
-				if (!window.isReresh) {
+			console.info(res);
 
-					window.isReresh = true;
+			//如果获取成功
+			if (res.success) {
+				isRefreshing = false;
 
-					let refreshData = {
-						token: token,
-						refresh_token: refresh_token
-					};
+				sessionStorage.setItem("token", JSON.stringify(tokenResult.data.token));
+				sessionStorage.setItem("refreshToken", JSON.stringify(tokenResult.data.refreshToken));
+				sessionStorage.setItem("expires", JSON.stringify(tokenResult.data.expires));
+				sessionStorage.setItem("refreshExpires", JSON.stringify(tokenResult.data.refreshExpires));
 
-					getRefreshToken(refreshData).then(res => {
+				response.config.headers.Authorization = tokenResult.data.token;
+				// 已经刷新了token，将所有队列中的请求进行重试
+				requests.forEach(cb => cb(tokenResult.data.token));
+				requests = [];
 
-						console.info('aaaaaaaaaaaaaaa');
-						console.info(res);
+				//重新请求之前的内容
+				return request(response.config);
 
-						//如果获取成功
-						if (res.success) {
-							window.isReresh = false;
-
-							sessionStorage.setItem("token", JSON.stringify(res.data.token));
-							sessionStorage.setItem("refreshToken", JSON.stringify(res.data.refreshToken));
-							sessionStorage.setItem("expires", JSON.stringify(res.data.expires));
-							sessionStorage.setItem("refreshExpires", JSON.stringify(res.data.refreshExpires));
-						} else {
-							Message({
-								type: 'warning',
-								message: res.msg,
-								duration: 1500
-							});
-							//跳转到登录
-							router.replace({
-								path: '/Login',
-								query: {
-									redirect: router.currentRoute.fullPath
-								}
-							});
-						}
-
-					}).catch(err => { });
-
-				}
-
+			} else {
+				Message({
+					type: 'warning',
+					message: res.msg,
+					duration: 1500
+				});
+				//跳转到登录
+				router.replace({
+					path: '/Login',
+					query: {
+						redirect: router.currentRoute.fullPath
+					}
+				});
 			}
 
-
 		} else {
-			window.isReresh = false;
+
+			// 正在刷新token，将返回一个未执行resolve的promise
+			return new Promise((resolve) => {
+				// 将resolve放进队列，用一个函数形式来保存，等token刷新后直接执行
+				requests.push((token) => {
+					response.config.headers.Authorization = token;
+					resolve(request(response.config));
+				});
+			});
+
 		}
 
-		return response;
-	},
+	}
+
+	// if (token) {
+
+	// 	var timeSpan = expires - timestamp;
+
+	// 	console.info('token get countdown:' + timeSpan);
+
+	// 	//如果时间小于10分种
+	// 	if (timeSpan < 60000) {
+
+
+	// 	}
+
+
+	// } else {
+	// 	window.isReresh = false;
+	// }
+
+	return response;
+},
 	error => {
 
 		if (error.response) {

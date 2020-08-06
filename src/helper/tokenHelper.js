@@ -7,11 +7,3 @@ export function getRefreshToken(param) { // 刷新token 注意这里用到的ser
       return Promise.resolve(res.data)
     })
 }
-
-export function isRefreshTokenExpired(timestamp) {
-  clearInterval(window.interval);
-  window.interval = setInterval(() => {
-    timestamp = timestamp - 1
-    sessionStorage.setItem('resetTime', timestamp)
-  }, 1000);
-}
