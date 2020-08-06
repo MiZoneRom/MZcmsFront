@@ -32,7 +32,7 @@ request.interceptors.request.use(
 );
 
 // http response 拦截器
-request.interceptors.response.use(async response => {
+request.interceptors.response.use(async (response) => {
 
 	//请求状态
 	var status = response.status;
@@ -46,132 +46,103 @@ request.interceptors.response.use(async response => {
 		return response;
 	}
 
-	//如果请求正常
-	if (status == 200) {
-		return response;
-	} else if (status == 402) {
+	return response;
 
-		//获取Token
-		const token = JSON.parse(sessionStorage.getItem('token'));
-		const expires = parseInt(JSON.parse(sessionStorage.getItem('expires')));
-		const refresh_token = JSON.parse(sessionStorage.getItem('refreshToken'));
+}, async (error) => {
 
-		if (!isRefreshing) {
+	if (error.response) {
 
-			isRefreshing = true;
+		var status = error.response.status;
 
-			let refreshData = {
-				token: token,
-				refresh_token: refresh_token
-			};
+		if (status == 401) {
 
-			var tokenResult = await getRefreshToken(refreshData);
+			//获取Token
+			const token = JSON.parse(sessionStorage.getItem('token'));
+			const expires = parseInt(JSON.parse(sessionStorage.getItem('expires')));
+			const refresh_token = JSON.parse(sessionStorage.getItem('refreshToken'));
 
-			console.info(res);
+			//如果没有正在刷新
+			if (!isRefreshing) {
 
-			//如果获取成功
-			if (res.success) {
-				isRefreshing = false;
+				//设置为正在刷新
+				isRefreshing = true;
 
-				sessionStorage.setItem("token", JSON.stringify(tokenResult.data.token));
-				sessionStorage.setItem("refreshToken", JSON.stringify(tokenResult.data.refreshToken));
-				sessionStorage.setItem("expires", JSON.stringify(tokenResult.data.expires));
-				sessionStorage.setItem("refreshExpires", JSON.stringify(tokenResult.data.refreshExpires));
+				let refreshData = {
+					token: token,
+					refresh_token: refresh_token
+				};
 
-				response.config.headers.Authorization = tokenResult.data.token;
-				// 已经刷新了token，将所有队列中的请求进行重试
-				requests.forEach(cb => cb(tokenResult.data.token));
-				requests = [];
+				//刷新数据
+				var tokenResult = await getRefreshToken(refreshData);
 
-				//重新请求之前的内容
-				return request(response.config);
+				//如果获取成功
+				if (tokenResult.success) {
+					isRefreshing = false;
+
+					sessionStorage.setItem("token", JSON.stringify(tokenResult.data.token));
+					sessionStorage.setItem("refreshToken", JSON.stringify(tokenResult.data.refreshToken));
+					sessionStorage.setItem("expires", JSON.stringify(tokenResult.data.expires));
+					sessionStorage.setItem("refreshExpires", JSON.stringify(tokenResult.data.refreshExpires));
+
+					// 已经刷新了token，将所有队列中的请求进行重试
+					requests.forEach(cb => cb(tokenResult.data.token));
+					requests = [];
+
+					//重新请求之前的内容
+					error.config.headers.Authorization = 'Bearer ' + tokenResult.data.token;
+					return request(error.config);
+
+				} else {
+					//刷新失败信息
+					Message({
+						type: 'warning',
+						message: res.msg,
+						duration: 1500
+					});
+					//跳转到登录
+					router.replace({
+						path: '/Login',
+						query: {
+							redirect: router.currentRoute.fullPath
+						}
+					});
+				}
 
 			} else {
-				Message({
-					type: 'warning',
-					message: res.msg,
-					duration: 1500
+
+				// 正在刷新token，将返回一个未执行resolve的promise
+				return new Promise((resolve) => {
+					// 将resolve放进队列，用一个函数形式来保存，等token刷新后直接执行
+					requests.push((token) => {
+						error.config.headers.Authorization = 'Bearer ' + token;
+						resolve(request(error.config));
+					});
 				});
-				//跳转到登录
-				router.replace({
-					path: '/Login',
-					query: {
-						redirect: router.currentRoute.fullPath
-					}
-				});
+
 			}
 
-		} else {
-
-			// 正在刷新token，将返回一个未执行resolve的promise
-			return new Promise((resolve) => {
-				// 将resolve放进队列，用一个函数形式来保存，等token刷新后直接执行
-				requests.push((token) => {
-					response.config.headers.Authorization = token;
-					resolve(request(response.config));
-				});
+		} else if (status == 403) {
+			router.replace({
+				path: '/Login',
+				query: {
+					redirect: router.currentRoute.fullPath//登录之后跳转到对应页面
+				}
 			});
-
+			return;
 		}
+
+	} else {
+
+		Message({
+			type: 'warning',
+			message: '抱歉，请求处理异常',
+			duration: 1500
+		});
 
 	}
 
-	// if (token) {
-
-	// 	var timeSpan = expires - timestamp;
-
-	// 	console.info('token get countdown:' + timeSpan);
-
-	// 	//如果时间小于10分种
-	// 	if (timeSpan < 60000) {
-
-
-	// 	}
-
-
-	// } else {
-	// 	window.isReresh = false;
-	// }
-
-	return response;
-},
-	error => {
-
-		if (error.response) {
-
-			switch (error.response.status) {
-				case 401://认证过期
-					//store.commit('DelToken');
-					router.replace({
-						path: '/Login',
-						query: {
-							redirect: router.currentRoute.fullPath//登录之后跳转到对应页面
-						}
-					});
-					return;
-				case 403://权限
-					//store.commit('DelToken');
-					router.replace({
-						path: '/Login',
-						query: {
-							redirect: router.currentRoute.fullPath//登录之后跳转到对应页面
-						}
-					});
-					return;
-			}
-
-		} else {
-
-			Message({
-				type: 'warning',
-				message: '抱歉，请求处理异常',
-				duration: 1500
-			});
-
-		}
-
-		return Promise.reject(error)
-	}
+	return Promise.reject(error)
+}
 )
 
 
@@ -220,10 +191,7 @@ export function post(url, data = {}) {
 */
 export function patch(url, data = {}) {
 	return new Promise((resolve, reject) => {
-		request.patch(url, data, {
-			responseType: 'json',
-			withCredentials: true
-		})
+		request.patch(url, data)
 			.then(response => {
 				resolve(response.data);
 			}, error => {
@@ -241,10 +209,7 @@ export function patch(url, data = {}) {
 */
 export function put(url, data = {}) {
 	return new Promise((resolve, reject) => {
-		request.put(url, data, {
-			responseType: 'json',
-			withCredentials: true
-		})
+		request.put(url, data)
 			.then(response => {
 				resolve(response.data);
 			}, error => {
