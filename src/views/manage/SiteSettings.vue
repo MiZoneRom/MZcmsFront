@@ -87,9 +87,11 @@ export default {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           var formModel = this.$refs[formName].model;
-          that.$post(apiPath.EDIT_SITE_SETTINGS, formModel).then((response) => {
-            console.info(response);
-          });
+          that
+            .$post(apiPath.EDIT_SITE_SETTINGS, formModel, true)
+            .then((response) => {
+              console.info(response);
+            });
         } else {
           console.log("error submit!!");
           return false;

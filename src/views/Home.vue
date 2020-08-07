@@ -274,7 +274,7 @@ export default {
   },
   created() {
     let vm = this;
-    vm.$get(apiPath.USER_INFO).then((response) => {
+    vm.$get(apiPath.USER_INFO, null, true).then((response) => {
       vm.realName = response.managerModel.realName;
       vm.avatarUrl = response.managerModel.avatar;
     });

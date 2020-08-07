@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { Message } from 'element-ui'
+import { Message, Loading } from 'element-ui'
 import { getRefreshToken } from '../helper/tokenHelper'
 import router from '../router'
 
@@ -144,23 +144,27 @@ request.interceptors.response.use(async (response) => {
 	return Promise.reject(error)
 })
 
-
 /**
 * Get方法
 * @param url
 * @param data
 * @return {Promise}
 */
-export function get(url, params = {}) {
+export function get(url, params = {}, showLoding = false) {
 	return new Promise((resolve, reject) => {
-		request.get(url, {
-			params: params
-		})
-			.then(response => {
-				resolve(response.data);
-			}).catch(error => {
-				reject(error);
-			})
+		var loadingMask = null;
+		if (showLoding) {
+			loadingMask = showLoading();
+		}
+		request.get(url, { params: params }).then(response => {
+			resolve(response.data);
+		}).catch(error => {
+			reject(error);
+		}).finally(res => {
+			if (loadingMask) {
+				loadingMask.close();
+			}
+		});
 	})
 }
 
@@ -170,17 +174,23 @@ export function get(url, params = {}) {
  * @param data
  * @return {Promise}
  */
-export function post(url, data = {}) {
+export function post(url, data = {}, showLoding = false) {
 	return new Promise((resolve, reject) => {
-		request.post(url, data)
-			.then(response => {
-				resolve(response.data);
-			}, error => {
-				reject(error)
-			})
+		var loadingMask = null;
+		if (showLoding) {
+			loadingMask = showLoading();
+		}
+		request.post(url, data).then(response => {
+			resolve(response.data);
+		}, error => {
+			reject(error)
+		}).finally(res => {
+			if (loadingMask) {
+				loadingMask.close();
+			}
+		});
 	});
 }
-
 
 /**
 * Patch请求
@@ -188,17 +198,23 @@ export function post(url, data = {}) {
 * @param data
 * @return {Promise}
 */
-export function patch(url, data = {}) {
+export function patch(url, data = {}, showLoding = false) {
 	return new Promise((resolve, reject) => {
-		request.patch(url, data)
-			.then(response => {
-				resolve(response.data);
-			}, error => {
-				reject(error)
-			})
+		var loadingMask = null;
+		if (showLoding) {
+			loadingMask = showLoading();
+		}
+		request.patch(url, data).then(response => {
+			resolve(response.data);
+		}, error => {
+			reject(error)
+		}).finally(res => {
+			if (loadingMask) {
+				loadingMask.close();
+			}
+		});
 	})
 }
-
 
 /**
 * Put请求
@@ -206,14 +222,25 @@ export function patch(url, data = {}) {
 * @param data
 * @return {Promise}
 */
-export function put(url, data = {}) {
+export function put(url, data = {}, showLoding = false) {
 	return new Promise((resolve, reject) => {
-		request.put(url, data)
-			.then(response => {
-				resolve(response.data);
-			}, error => {
-				reject(error)
-			})
+		var loadingMask = null;
+		if (showLoding) {
+			loadingMask = showLoading();
+		}
+		request.put(url, data).then(response => {
+			resolve(response.data);
+		}, error => {
+			reject(error)
+		}).finally(res => {
+			if (loadingMask) {
+				loadingMask.close();
+			}
+		});
 	})
 }
 
+export function showLoading() {
+	let loading = Loading.service();
+	return loading;
+}
