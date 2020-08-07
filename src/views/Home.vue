@@ -14,12 +14,9 @@
           <el-submenu index="4" class="pull-right">
             <template slot="title">
               <el-avatar icon="el-icon-user-solid" :src="avatarUrl"></el-avatar>
-              {{username}}
+              {{realName}}
             </template>
-            <el-menu-item
-              index="3-1"
-              @click.native="$router.push('/profile')"
-            >个人主页</el-menu-item>
+            <el-menu-item index="3-1" @click.native="$router.push('/profile')">个人主页</el-menu-item>
             <el-menu-item index="3-2" @click.native="logout">退出登录</el-menu-item>
           </el-submenu>
         </el-menu>
@@ -241,7 +238,7 @@ export default {
   data() {
     return {
       isCollapse: false,
-      username: "-",
+      realName: "-",
       avatarUrl: "",
       route: global.antRouter,
     };
@@ -260,12 +257,6 @@ export default {
     handleselect() {
       console.log("handleselect");
     },
-    showMenu(i, status) {
-      console.log(i);
-      this.$refs.menuCollapsed.getElementsByClassName(
-        "submenu-hook-" + i
-      )[0].style.display = status ? "block" : "none";
-    },
     logout() {
       let vm = this;
 
@@ -283,11 +274,9 @@ export default {
   },
   created() {
     let vm = this;
-    console.info(this.route);
-    vm.$get(apiPath.USER_INFO).then((data) => {
-      vm.username = data.managerModel.realName;
-      vm.avatarUrl =
-        data.managerModel.avatar == null ? "" : data.managerModel.avatar;
+    vm.$get(apiPath.USER_INFO).then((response) => {
+      vm.realName = response.managerModel.realName;
+      vm.avatarUrl = response.managerModel.avatar;
     });
   },
   computed: {},

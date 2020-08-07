@@ -63,30 +63,22 @@ router.beforeEach(async (to, from, next) => {
 
 	//获取系统配置
 	if (!siteSettings) {
-		if (!getLocalStorage(cacheKeyCollection.SITE_SETTINGS)) {
-			var remoteSiteSettings = await axios.get(apiPath.SITE_SETTINGS);
-			siteSettings = remoteSiteSettings.data.data;
-			saveLocalStorage(cacheKeyCollection.SITE_SETTINGS, siteSettings);
-		} else {
-			siteSettings = getLocalStorage(cacheKeyCollection.SITE_SETTINGS);
-		}
+		var remoteSiteSettings = await axios.get(apiPath.SITE_SETTINGS);
+		siteSettings = remoteSiteSettings.data.data;
 	}
 
 	//获取系统路由
 	if (!siteRouter) {
-		if (!getLocalStorage(cacheKeyCollection.ROUTER)) {
-			//从后台获取路由
-			var remoteRouter = await axios.get(apiPath.NAVIGATION);
-			var siteRouterData = remoteRouter.data.data;
-			//存储路由到localStorage
-			saveLocalStorage(cacheKeyCollection.ROUTER, siteRouterData);
-			//执行路由跳转方法
-			initRouter(siteRouterData, to, next);
-		} else {//从localStorage拿到了路由
-			//拿到路由
-			var siteRouterData = getLocalStorage(cacheKeyCollection.ROUTER);
-			initRouter(siteRouterData, to, next);
-		}
+		//从后台获取路由
+		var remoteRouter = await axios.get(apiPath.NAVIGATION);
+		var siteRouterData = remoteRouter.data.data;
+		//执行路由跳转方法
+		initRouter(siteRouterData, to, next);
+	}
+
+	/* 路由发生变化修改页面title */
+	if (to.meta.title) {
+		document.title = to.meta.title
 	}
 
 	//如果用户过期且没有前往登录
@@ -130,6 +122,9 @@ function filterAsyncRouter(asyncRouterMap) {
 		if (route.children && route.children.length) {
 			route.children = filterAsyncRouter(route.children);
 		}
+		route.meta = {
+			title: `${route.name} - ${siteSettings.siteName}`
+		};
 		return true;
 	});
 	return accessedRouters;
