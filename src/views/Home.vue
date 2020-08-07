@@ -122,7 +122,7 @@
         aside {
           width: 65px;
           .menu-text {
-            display: none;
+            opacity: 0;
           }
           .menu-icon {
             font-size: 20px;
@@ -173,6 +173,12 @@
         top: 60px;
         box-shadow: 0 4px 25px 0 rgba(0, 0, 0, 0.1);
         transition: all 0.3s;
+        .menu-text {
+          transition: all 0.3s;
+        }
+        .menu-icon {
+          transition: all 0.3s;
+        }
         .el-menu-vertical {
           height: 100%;
         }
