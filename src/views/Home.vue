@@ -2,7 +2,7 @@
   <el-row class="container">
     <el-col class="main" :span="24" :class="isCollapse?'menu-collapsed':'menu-expanded'">
       <div class="header">
-        <el-menu class="el-menu-demo" mode="horizontal">
+        <el-menu class="el-menu-nav" mode="horizontal">
           <el-menu-item index="1" class="logo">
             <img src="/static/logo.png" />
             <span>MCS</span>
@@ -25,7 +25,7 @@
       <section class="content-container">
         <aside>
           <el-menu
-            default-active="1-4-1"
+            :default-active="$route.path"
             class="el-menu-vertical"
             @open="handleOpen"
             @close="handleClose"
@@ -47,13 +47,10 @@
                   :index="child.path"
                   v-if="!child.hidden"
                   @click="$router.push(child.path)"
-                >{{child.name}}</el-menu-item>
+                >
+                <i :class="'menu-icon '+child.iconCls"></i>
+                {{child.name}}</el-menu-item>
               </el-submenu>
-              <!-- 叶子结点 -->
-              <el-menu-item v-if="item.leaf&&item.children.length>0" :index="item.children[0].path">
-                <i :class="item.iconCls"></i>
-                {{item.children[0].name}}
-              </el-menu-item>
             </template>
           </el-menu>
         </aside>
@@ -156,7 +153,7 @@
       .pull-right {
         float: right;
       }
-      .el-menu-demo {
+      .el-menu-nav {
         width: 100%;
       }
     }
@@ -175,6 +172,7 @@
         transition: all 0.3s;
         .menu-text {
           transition: all 0.3s;
+          padding-left: 10px;
         }
         .menu-icon {
           transition: all 0.3s;
